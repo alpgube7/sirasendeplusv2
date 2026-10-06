@@ -1,6 +1,0 @@
-{
-  "name": "SıraSende — Ortak Müzik Odası",
-  "description": "Kendi listeni oluştur, ortak odada herkesin listesinden sırayla ve senkronize müzik dinle. AI DJ sesli sohbet ve Lyria müzik üretimi ile zenginleştirilmiş adil müzik platformu.",
-  "requestFramePermissions": ["microphone"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
