@@ -1,5 +1,8 @@
 import { RoomState, Track, Playlist, ChatMessage, FloatingReaction } from '../types/music';
 
+// Backend base URL (örn. https://xxx.onrender.com). Boşsa aynı origin kullanılır.
+const API_BASE = ((import.meta as any).env?.VITE_API_URL as string | undefined)?.replace(/\/+$/, '') || '';
+
 export interface MusicApiResponse {
   serverTime: number;
   rooms: Array<{
@@ -93,7 +96,9 @@ class ApiService {
 
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      const wsUrl = API_BASE
+        ? `${API_BASE.replace(/^http/, 'ws')}/ws`
+        : `${protocol}//${window.location.host}/ws`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
@@ -140,7 +145,7 @@ class ApiService {
   }
 
   public async fetchMusicState(roomId?: string): Promise<MusicApiResponse> {
-    const url = `/api/music?userId=${encodeURIComponent(this.activeUserId)}${roomId ? `&room=${encodeURIComponent(roomId)}` : ''}`;
+    const url = `${API_BASE}/api/music?userId=${encodeURIComponent(this.activeUserId)}${roomId ? `&room=${encodeURIComponent(roomId)}` : ''}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('Müzik durumu alınamadı');
     return res.json();
@@ -148,7 +153,7 @@ class ApiService {
 
   public async postAction(action: string, data: Record<string, any> = {}): Promise<any> {
     const user = this.getUserProfile();
-    const res = await fetch('/api/music', {
+    const res = await fetch(`${API_BASE}/api/music`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -166,14 +171,14 @@ class ApiService {
   }
 
   public async searchMedia(query: string): Promise<any[]> {
-    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
     if (!res.ok) return [];
     const data = await res.json();
     return data.results || [];
   }
 
   public async parseMediaUrl(url: string): Promise<any> {
-    const res = await fetch(`/api/media?url=${encodeURIComponent(url)}`);
+    const res = await fetch(`${API_BASE}/api/media?url=${encodeURIComponent(url)}`);
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.error || 'URL çözümlenemedi');
@@ -182,7 +187,7 @@ class ApiService {
   }
 
   public async triggerAiDjAnnounce(roomId: string): Promise<{ announcement: string }> {
-    const res = await fetch('/api/ai/dj-announce', {
+    const res = await fetch(`${API_BASE}/api/ai/dj-announce`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ roomId }),
@@ -192,7 +197,7 @@ class ApiService {
 
   public async chatWithAiDj(message: string, roomId?: string): Promise<string> {
     const user = this.getUserProfile();
-    const res = await fetch('/api/ai/chat-dj', {
+    const res = await fetch(`${API_BASE}/api/ai/chat-dj`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -212,7 +217,7 @@ class ApiService {
     title: string;
     artist: string;
   }> {
-    const res = await fetch('/api/ai/generate-music', {
+    const res = await fetch(`${API_BASE}/api/ai/generate-music`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, genre, durationSeconds }),
