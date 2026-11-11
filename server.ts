@@ -194,7 +194,7 @@ app.get('/api/media', async (req, res) => {
 });
 
 // Search endpoint for quick catalog track discovery
-app.get('/api/search', (req, res) => {
+app.get('/api/search', async (req, res) => {
   const normalize = (str: string) =>
     str
       .toLowerCase()
@@ -227,7 +227,58 @@ app.get('/api/search', (req, res) => {
     (c) => normalize(c.title).includes(query) || normalize(c.artist).includes(query)
   );
 
-  res.json({ results });
+  const parseDuration = (text: string) => {
+    const parts = text.split(':').map(Number);
+    if (parts.some(isNaN)) return 0;
+    return parts.length === 3
+      ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+      : parts.length === 2
+        ? parts[0] * 60 + parts[1]
+        : parts[0];
+  };
+
+  try {
+    const r = await fetch(
+      'https://www.youtube.com/youtubei/v1/search?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          context: { client: { clientName: 'WEB', clientVersion: '2.20250918.01.00', hl: 'tr', gl: 'TR' } },
+          query: rawQuery,
+        }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+    if (!r.ok) throw new Error(`innertube ${r.status}`);
+    const data: any = await r.json();
+    const sections =
+      data?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents || [];
+    const ytResults: any[] = [];
+    for (const section of sections) {
+      for (const item of section?.itemSectionRenderer?.contents || []) {
+        const v = item?.videoRenderer;
+        if (!v?.videoId || !v?.lengthText?.simpleText) continue;
+        const title = (v.title?.runs || []).map((x: any) => x.text).join('');
+        const thumbs = v.thumbnail?.thumbnails || [];
+        ytResults.push({
+          id: v.videoId,
+          title,
+          artist: v.ownerText?.runs?.[0]?.text || '',
+          thumbnail: thumbs.length ? thumbs[thumbs.length - 1].url : '',
+          url: `https://www.youtube.com/watch?v=${v.videoId}`,
+          duration: parseDuration(v.lengthText.simpleText),
+          provider: 'youtube',
+        });
+        if (ytResults.length >= 12) break;
+      }
+      if (ytResults.length >= 12) break;
+    }
+    if (ytResults.length) return res.json({ results: ytResults });
+    throw new Error('innertube empty');
+  } catch {
+    res.json({ results });
+  }
 });
 
 // Music state endpoint

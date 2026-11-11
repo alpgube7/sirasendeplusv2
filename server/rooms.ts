@@ -64,6 +64,42 @@ const SEED_TRACKS: Track[] = [
   }
 ];
 
+const AG7_TRACKS: Track[] = [
+  {
+    id: 'tr-ag7-1',
+    title: 'Eye Of The Tiger (Official HD Video)',
+    artist: 'Survivor',
+    url: 'https://www.youtube.com/watch?v=btPJPFnesV4',
+    provider: 'youtube',
+    duration: 210,
+    thumbnail: 'https://i.ytimg.com/vi/btPJPFnesV4/hqdefault.jpg',
+    addedByUserId: 'user-qdm395',
+    addedByName: 'Misafir Müziksever',
+  },
+  {
+    id: 'tr-ag7-2',
+    title: 'Thunderstruck (Official Video)',
+    artist: 'AC/DC',
+    url: 'https://www.youtube.com/watch?v=v2AC41dglnM',
+    provider: 'youtube',
+    duration: 210,
+    thumbnail: 'https://i.ytimg.com/vi/v2AC41dglnM/hqdefault.jpg',
+    addedByUserId: 'user-qdm395',
+    addedByName: 'Misafir Müziksever',
+  },
+  {
+    id: 'tr-ag7-3',
+    title: 'Rasputin (Sopot Festival 1979)',
+    artist: 'Boney M.',
+    url: 'https://www.youtube.com/watch?v=16y1AkoZkmQ',
+    provider: 'youtube',
+    duration: 210,
+    thumbnail: 'https://i.ytimg.com/vi/16y1AkoZkmQ/hqdefault.jpg',
+    addedByUserId: 'user-qdm395',
+    addedByName: 'Misafir Müziksever',
+  },
+];
+
 export class RoomManager {
   private rooms: Map<string, RoomState> = new Map();
   private userPlaylists: Map<string, Playlist[]> = new Map();
@@ -253,6 +289,68 @@ export class RoomManager {
 
     this.rooms.set(room1.id, room1);
     this.rooms.set(room2.id, room2);
+
+    const pAg7: Playlist = {
+      id: 'pl-1791295660050-h46w',
+      userId: 'user-qdm395',
+      name: 'AG7-1',
+      description: 'KG',
+      createdAt: 1791295660050,
+      tracks: AG7_TRACKS,
+    };
+    this.trackStore.set('pl-1791295660050-h46w', AG7_TRACKS);
+    this.userPlaylists.set('user-qdm395', [pAg7]);
+
+    const roomAg7: RoomState = {
+      id: 'oda-muwr67u6-qpz',
+      name: 'AG7 nin Odası',
+      description: 'AG7 Kafama göre',
+      genre: 'Karışık & Keşif',
+      coverImage: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop',
+      hostId: 'user-qdm395',
+      hostName: 'Misafir Müziksever',
+      isPublic: true,
+      playing: false,
+      startedAt: Date.now(),
+      offsetSeconds: 149,
+      currentTrack: AG7_TRACKS[2],
+      currentDjUserId: 'user-qdm395',
+      currentDjName: 'Misafir Müziksever',
+      lastPlayedUserId: 'user-qdm395',
+      memberCursors: { 'user-qdm395': 6 },
+      members: [
+        {
+          userId: 'user-qdm395',
+          name: 'Misafir Müziksever',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+          color: '#6366F1',
+          role: 'host',
+          joinedAt: 1791295637551,
+          activePlaylistId: 'pl-1791295660050-h46w',
+          trackCount: 3,
+          isOnline: true,
+        },
+      ],
+      skipVotes: [],
+      requiredSkipVotes: 1,
+      messages: [
+        {
+          id: 'msg-ag7-1',
+          roomId: 'oda-muwr67u6-qpz',
+          userId: 'system',
+          userName: 'SıraSende',
+          userAvatar: '',
+          userColor: '#6B7280',
+          text: '"AG7 nin Odası" odası kuruldu! Şarkı listenizi ekleyerek sıraya dahil olun.',
+          timestamp: 1791295637551,
+          type: 'system',
+        },
+      ],
+      aiDjEnabled: true,
+      aiDjVoice: 'Zephyr',
+      createdAt: 1791295637551,
+    };
+    this.rooms.set(roomAg7.id, roomAg7);
   }
 
   // Get public room list summaries
